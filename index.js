@@ -1,90 +1,84 @@
-const { Client, GatewayIntentBits, ActivityType, Collection } = require('discord.js');
-const { EmbedBuilder } = require('discord.js');
+/**
+ ██████╗░████████╗██╗░░██╗           
+ ██╔══██╗╚══██╔══╝╚██╗██╔╝          
+ ██████╔╝░░░██║░░░░╚███╔╝░          
+ ██╔══██╗░░░██║░░░░██╔██╗░          
+ ██║░░██║░░░██║░░░██╔╝╚██╗          
+ ╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚═╝          
+  GIT : https://github.com/RTX-GAMINGG/Bot-ghost-status-remover-by-RTX
+  DISCORD SERVER : https://discord.gg/FUEHs7RCqz
+  YOUTUBE : https://www.youtube.com/channel/UCPbAvYWBgnYhliJa1BIrv0A
+ * **********************************************
+ *   Code by RTX GAMING
+ * **********************************************
+ */
+
+const { Client, GatewayIntentBits, ActivityType, TextChannel } = require('discord.js');
+require('dotenv')
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
-
-require('dotenv').config();
-
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.GuildBans,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildInvites,
-        GatewayIntentBits.GuildMessageTyping,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.DirectMessageReactions,
-        GatewayIntentBits.DirectMessageTyping,
-    ],
+  intents: Object.keys(GatewayIntentBits).map((a) => {
+    return GatewayIntentBits[a];
+  }),
+});
+const app = express();
+const port = 3000;
+app.get('/', (req, res) => {
+  const imagePath = path.join(__dirname, 'index.html');
+  res.sendFile(imagePath);
+});
+app.listen(port, () => {
+  console.log(`🔗 Listening to RTX: http://localhost:${port}`);
+  console.log(`🔗 Replit URL: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
 });
 
-// Set the prefix for the bot
-const prefixData = require('./prefix.json');
-const prefix = prefixData.prefix;
-const config = require('./config.json');
-
-const spotifyClientId = config.spotify.clientId;
-const spotifyClientSecret = config.spotify.clientSecret;
-const youtubeApiKey = config.youtube.apiKey;
+const statusMessages = ["SiciliaMC","SiciliaMC","SiciliaMC","SiciliaMC","SiciliaMC"];
 
 
+let currentIndex = 0;
+const channelId = '';
+
+async function login() {
+  try {
+    await client.login(process.env.TOKEN);
+    console.log(`Logged in as ${client.user.tag}`);
+  } catch (error) {
+    console.error('Failed to log in:', error);
+    process.exit(1);
+  }
+}
+
+function updateStatusAndSendMessages() {
+  const currentStatus = statusMessages[currentIndex];
+  const nextStatus = statusMessages[(currentIndex + 1) % statusMessages.length];
+
+  client.user.setPresence({
+    activities: [{ name: currentStatus, type: ActivityType.Custom}],
+    status: 'online',
+  });
+
+  
+  const textChannel = client.channels.cache.get(channelId);
+
+  if (textChannel instanceof TextChannel) {
+   
+    textChannel.send(`Bot status is: ${currentStatus}`);
+  } else {
+
+  }
+
+  currentIndex = (currentIndex + 1) % statusMessages.length;
+}
 
 client.once('ready', () => {
-    console.log('Commands Loaded successfully ❤️.');
-    console.log(`Logged in as ${client.user.username}`);
-    console.log(`Bot is in ${client.guilds.cache.size} servers`);
-    console.log(`Total members across all servers: ${client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)}`);
-    console.log('MADE BY RTX GAMING');
-    client.user.setPresence({
-        activities: [{
-            name: 'with RTX',
-            type: ActivityType.Playing,
-            url: 'https://www.twitch.tv/RTX'
-        }],
-        status: 'available'
-    });
-});
-client.commands = new Map();
+  console.log(`✅ Bot is ready as ${client.user.tag}`);
+  updateStatusAndSendMessages();
 
-
-const commandsPath = path.join(__dirname, 'commands');
-const musicCommandsPath = path.join(__dirname, 'musicCommands');
-
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-const musicCommandFiles = fs.readdirSync(musicCommandsPath).filter(file => file.endsWith('.js'));
-
-for (const file of commandFiles) {
-    const command = require(path.join(commandsPath, file));
-    client.commands.set(command.name, command);
-}
-
-for (const file of musicCommandFiles) {
-    const command = require(path.join(musicCommandsPath, file));
-    client.commands.set(command.name, command);
-}
-
-
-client.on('messageCreate', message => {
-    if (!message.content.startsWith(prefix) || message.author.bot) return;
-
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
-
-    const command = client.commands.get(commandName);
-
-    if (!command) return;
-
-    try {
-        command.execute(message, args);
-    } catch (error) {
-        console.error(error);
-        message.reply('There was an error trying to execute that command!');
-    }
+  setInterval(() => {
+    updateStatusAndSendMessages();
+  }, 5000);
 });
 
-
-client.login(process.env.TOKEN);
+login();
