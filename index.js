@@ -34,7 +34,7 @@ app.listen(port, () => {
   console.log(`🔗 Replit URL: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
 });
 
-const statusMessages = ["Chicken 🐔","Chicken 🐔","Chicken 🐔","Chicken 🐔","Chicken 🐔"];
+const statusMessages = ["Minecraft","Minecraft","Minecraft","Minecraft","Minecraft"];
 
 
 let currentIndex = 0;
