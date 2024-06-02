@@ -34,7 +34,7 @@ app.listen(port, () => {
   console.log(`🔗 Replit URL: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
 });
 
-const statusMessages = ["Minecraft","Minecraft","Minecraft","Minecraft","Minecraft"];
+const statusMessages = ["Risha System","Risha System","Risha System","Risha System","Risha System"];
 
 
 let currentIndex = 0;
